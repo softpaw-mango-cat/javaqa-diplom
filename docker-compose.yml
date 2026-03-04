@@ -1,0 +1,88 @@
+services:
+  # --- Контейнер с MySQL ---
+  mysql:
+    image: mysql:8.0
+    container_name: diplom-mysql
+    # Переменные окружения для настройки БД
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: pass
+    # Проброс портов: "порт_на_хосте:порт_в_контейнере"
+    ports:
+      - "3306:3306"
+    # Добавляем healthcheck для проверки готовности MySQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "app", "-ppass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # --- Контейнер с PostgreSQL ---
+  postgres:
+    image: postgres:14-alpine
+    container_name: diplom-postgres
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    # Добавляем healthcheck для проверки готовности PostgreSQL
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # --- Контейнер с эмулятором банковских сервисов (Node.js) ---
+  node-app:
+    build:
+      # Dockerfile для gate simulator
+      context: ./gate-simulator
+    container_name: diplom-node-app
+    ports:
+      - "9999:9999"
+    # Добавляем healthcheck для проверки готовности Node.js приложения
+  #  healthcheck:
+   #   test: ["CMD", "wget", "--spider", "http://localhost:9999"]
+   #   interval: 10s
+    #  timeout: 5s
+    #  retries: 5
+    #  start_period: 10s
+
+  # --- Контейнер для нашего приложения  ---
+  app:
+    # Собираем образ из папки app
+    build: ./app
+    container_name: diplom-app
+    ports:
+      - "8080:8080"  # Пробрасываем порт приложения
+    # Задаем переменные окружения, которые использует Dockerfile приложения
+    environment:
+      # Для MySQL
+      DB_URL: jdbc:mysql://mysql:3306/app
+      DB_USER: app
+      DB_PASSWORD: pass
+      SPRING_CREDIT_GATE_URL: http://node-app:9999
+      SPRING_PAYMENT_GATE_URL: http://node-app:9999
+
+      # Для PostgreSQL (закомментировано)
+      # DB_URL: jdbc:postgresql://postgres:5432/app
+      # DB_USER: app
+      # DB_PASSWORD: pass
+      # SPRING_CREDIT_GATE_URL: http://node-app:9999
+      # SPRING_PAYMENT_GATE_URL: http://node-app:9999
+    # Добавляем depends_on с условиями ожидания готовности сервисов
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    #  node-app:
+       # condition: service_healthy
+    # Добавляем политику перезапуска на случай временных ошибок
+    restart: on-failure
