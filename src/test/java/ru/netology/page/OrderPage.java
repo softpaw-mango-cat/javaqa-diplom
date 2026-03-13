@@ -4,6 +4,8 @@ import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.Keys;
 import ru.netology.data.DataHelper;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
@@ -54,6 +56,32 @@ public class OrderPage {
     // нотификации
     private SelenideElement successNotification = $(".notification_status_ok");
     private SelenideElement errorNotification = $(".notification_status_error");
+
+    // подписи полей формы
+    private SelenideElement cardNumberSub = $$(".input")
+            .filter(text("Номер карты"))
+            .first()
+            .$(".input__sub");
+
+    private SelenideElement monthSub = $$(".input")
+            .filter(text("Месяц"))
+            .first()
+            .$(".input__sub");
+
+    private SelenideElement yearSub = $$(".input")
+            .filter(text("Год"))
+            .first()
+            .$(".input__sub");
+
+    private SelenideElement ownerSub = $$(".input")
+            .filter(text("Владелец"))
+            .first()
+            .$(".input__sub");
+
+    private SelenideElement cvcCodeSub = $$(".input")
+            .filter(text("CVC/CVV"))
+            .first()
+            .$(".input__sub");
 
     // Очистка всех полей
     public void clearAllFields() {
@@ -111,7 +139,7 @@ public class OrderPage {
 
     // Нотификации
     public void verifySuccessNotification() {
-        successNotification.shouldBe(visible);
+        successNotification.shouldBe(visible, Duration.ofSeconds(15));
     }
 
     public void verifySuccessNotificationText() {
@@ -125,7 +153,7 @@ public class OrderPage {
     }
 
     public void verifyErrorNotification() {
-        errorNotification.shouldBe(visible);
+        errorNotification.shouldBe(visible, Duration.ofSeconds(15));
     }
 
     public void verifyErrorNotificationText() {
@@ -137,4 +165,31 @@ public class OrderPage {
                 .$(".notification__content")
                 .shouldHave(Condition.exactText("Ошибка! Банк отказал в проведении операции."));
     }
+
+    public void verifyCardFieldNotification(String subFieldText) {
+        cardNumberSub.shouldBe(visible);
+        cardNumberSub.shouldHave(text(subFieldText));
+    }
+
+    public void verifyMonthFieldNotification(String subFieldText) {
+        monthSub.shouldBe(visible);
+        monthSub.shouldHave(text(subFieldText));
+    }
+
+    public void verifyYearFieldNotification(String subFieldText) {
+        yearSub.shouldBe(visible);
+        yearSub.shouldHave(text(subFieldText));
+    }
+
+    public void verifyOwnerFieldNotification(String subFieldText) {
+        ownerSub.shouldBe(visible);
+        ownerSub.shouldHave(text(subFieldText));
+    }
+
+    public void verifyCvcFieldNotification(String subFieldText) {
+        cvcCodeSub.shouldBe(visible);
+        cvcCodeSub.shouldHave(text(subFieldText));
+    }
+
+
 }

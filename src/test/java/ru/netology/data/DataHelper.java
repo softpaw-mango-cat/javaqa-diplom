@@ -57,6 +57,37 @@ import java.util.Locale;
                     generateValidYear(), generateRandomName(),generateRandomCVC());
         }
 
+        public static CardInfo generateValidDeclinedCard() {
+            return new CardInfo(getValidDeclinedCardNumber(),generateValidMonth(),
+                    generateValidYear(), generateRandomName(),generateRandomCVC());
+        }
+
+        // методы для генерации карт с одним параметром - для проверки валидации полей
+        public static CardInfo generateCardWithNumber(String cardNumber) {
+            return new CardInfo(cardNumber,generateValidMonth(),
+                    generateValidYear(), generateRandomName(),generateRandomCVC());
+        }
+
+        public static CardInfo generateCardWithMonth(String month) {
+            return new CardInfo(getValidApprovedCardNumber(),month,
+                    generateValidYear(), generateRandomName(),generateRandomCVC());
+        }
+
+        public static CardInfo generateCardWithYear(String year) {
+            return new CardInfo(getValidApprovedCardNumber(),generateValidMonth(),
+                    year, generateRandomName(),generateRandomCVC());
+        }
+
+        public static CardInfo generateCardWithOwner(String owner) {
+            return new CardInfo(getValidApprovedCardNumber(),generateValidMonth(),
+                    generateValidYear(),owner, generateRandomCVC());
+        }
+
+        public static CardInfo generateCardWithCVC(String cvc) {
+            return new CardInfo(getValidApprovedCardNumber(),generateValidMonth(),
+                    generateValidYear(), generateRandomName(), cvc);
+        }
+
         @Value
         public static class CardInfo {
             String number;
