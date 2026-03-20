@@ -312,6 +312,4 @@ public class CreditUITest {
         page.fillAndSend(cardInfo);
         page.verifyCvcFieldNotification("Неверный формат");
     }
-
-
 }
