@@ -33,14 +33,4 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'selenide.headless', System.getProperty('selenide.headless')
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-        exceptionFormat = "full"
-
-        // Показывать все failures с полными деталями
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
-    }
 }

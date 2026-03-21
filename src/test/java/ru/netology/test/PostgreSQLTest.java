@@ -14,14 +14,14 @@ import ru.netology.data.DataHelper;
 import ru.netology.data.SQLHelper;
 import static io.restassured.RestAssured.given;
 
-public class MySQLTest {
+public class PostgreSQLTest {
 
     private static Gson gson = new Gson();
 
     @BeforeEach
     @SneakyThrows
     public void setUp() {
-        DatabaseConfig.connectToMySQL();
+        DatabaseConfig.connectToPostgreSQL();
         SQLHelper.clearAllTables();
     }
 
