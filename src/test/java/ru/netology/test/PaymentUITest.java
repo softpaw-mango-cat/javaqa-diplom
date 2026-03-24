@@ -17,8 +17,8 @@ public class PaymentUITest {
                 .open("http://localhost:8080", OrderPage.class);
     }
 
-    /*ПОЗИТИНЫЕ КЕЙСЫ
-    Покупка тура с одобренной валидной карты*/
+    /*ПОЗИТИВНЫЕ КЕЙСЫ
+    Покупка тура с одобренной валидной карты + */
     @Test
     @DisplayName("Should Make Payment With Approved Card")
     void shouldMakePaymentWithApprovedCard() {
