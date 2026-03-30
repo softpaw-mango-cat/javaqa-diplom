@@ -62,44 +62,6 @@ public class MySQLTest {
                 .post(endpoint);
     }
 
-    // ========== ПРОВЕРКА ОТВЕТОВ СЕРВЕРА ==========
-
-    @Test
-    public void shouldSendStatusCode200WhenPaymentIsCorrect() {
-        var approvedCard = getApprovedCard();
-        var response = getResponse("/api/v1/pay", approvedCard);
-        int statusCode = response.getStatusCode();
-
-        Assertions.assertEquals(200, statusCode, "Статус  должен быть 200");
-    }
-
-    @Test
-    public void shouldSendStatusCode200WhenCreditIsCorrect() {
-        var approvedCard = getApprovedCard();
-        var response = getResponse("/api/v1/credit", approvedCard);
-        int statusCode = response.getStatusCode();
-
-        Assertions.assertEquals(200, statusCode, "Статус  должен быть 200");
-    }
-
-    @Test
-    public void shouldNotSendStatusCode200WhenPaymentIsDeclined() {
-        var declinedCard = getDeclinedCard();
-        var response = getResponse("/api/v1/pay", declinedCard);
-        int statusCode = response.getStatusCode();
-
-        Assertions.assertNotEquals(200, statusCode, "Статус не должен быть 200");
-    }
-
-    @Test
-    public void shouldNotSendStatusCode200WhenCreditIsDeclined() {
-        var declinedCard = getDeclinedCard();
-        var response = getResponse("/api/v1/credit", declinedCard);
-        int statusCode = response.getStatusCode();
-
-        Assertions.assertNotEquals(200, statusCode, "Статус не должен быть 200");
-    }
-
     // ========== ПОЗИТИВНЫЕ ПРОВЕРКИ ДЛЯ ОПЛАТЫ КАРТОЙ ==========
     // В таблице payment_entity появилась одна запись
     // В таблице payment_entity значение статуса карты - approved

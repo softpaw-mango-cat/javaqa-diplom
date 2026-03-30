@@ -31,7 +31,7 @@ import java.util.Locale;
 
         public static String generateValidYear() {
             // валидный год - от 2026, то есть год действия карты
-            int month = FAKER.number().numberBetween(26, 30);
+            int month = FAKER.number().numberBetween(26, 32);
             return String.format("%02d", month);
         }
 
