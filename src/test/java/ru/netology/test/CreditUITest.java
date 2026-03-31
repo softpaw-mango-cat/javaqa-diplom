@@ -17,8 +17,9 @@ public class CreditUITest {
                 .open("http://localhost:8080", OrderPage.class);
     }
 
-    /*ПОЗИТИВНЫЕ КЕЙСЫ
-    Покупка тура в кредит с одобренной валидной карты + */
+    /* ПОЗИТИВНЫЕ КЕЙСЫ
+    TC-02: Успешная оплата тура в кредит по одобренной карте
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Make Payment With Approved Card")
     void shouldMakePaymentWithApprovedCard() {
@@ -29,9 +30,9 @@ public class CreditUITest {
         page.verifySuccessNotificationText();
     }
 
-    //НЕГАТИВНЫЕ КЕЙСЫ
-
-    /*Покупка тура в кредит с отклоненной валидной карты*/
+    /* НЕГАТИВНЫЕ КЕЙСЫ
+    TC-04: Отклонение оплаты тура в кредит по отклоненной карте
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Not Make Payment With Declined Card")
     void shouldNotMakePaymentWithDeclinedCard() {
@@ -42,7 +43,8 @@ public class CreditUITest {
         page.verifyErrorNotificationText();
     }
 
-    /*Покупка тура в кредит с несуществующей карты (карты, которой нет в наборе карт)*/
+    /* TC-06: Отклонение оплаты тура в кредит по карте не входящей в набор валидных карт
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Not Make Payment With Non Existing Card")
     void shouldNotMakePaymentWithNonExistingCard() {

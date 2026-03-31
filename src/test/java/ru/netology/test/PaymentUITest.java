@@ -17,8 +17,9 @@ public class PaymentUITest {
                 .open("http://localhost:8080", OrderPage.class);
     }
 
-    /*ПОЗИТИВНЫЕ КЕЙСЫ
-    Покупка тура с одобренной валидной карты + */
+    /* ПОЗИТИВНЫЕ КЕЙСЫ
+    TC-01: Успешная оплата тура по одобренной карте
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Make Payment With Approved Card")
     void shouldMakePaymentWithApprovedCard() {
@@ -29,9 +30,9 @@ public class PaymentUITest {
         page.verifySuccessNotificationText();
     }
 
-    //НЕГАТИВНЫЕ КЕЙСЫ
-
-    /*Покупка тура с отклоненной валидной карты*/
+    /* НЕГАТИВНЫЕ КЕЙСЫ
+    TC-03: Отклонение оплаты тура по отклоненной карте
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Not Make Payment With Declined Card")
     void shouldNotMakePaymentWithDeclinedCard() {
@@ -42,7 +43,8 @@ public class PaymentUITest {
         page.verifyErrorNotificationText();
     }
 
-    /*Покупка тура с несуществующей карты (карты, которой нет в наборе карт)*/
+    /* TC-05: Отклонение оплаты тура по карте не входящей в набор валидных карт
+    Шаги 1-3 */
     @Test
     @DisplayName("Should Not Make Payment With Non Existing Card")
     void shouldNotMakePaymentWithNonExistingCard() {
