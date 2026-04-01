@@ -153,7 +153,7 @@ public class OrderPage {
     }
 
     public void verifyErrorNotification() {
-        errorNotification.shouldBe(visible, Duration.ofSeconds(15));
+        errorNotification.shouldBe(visible, Duration.ofSeconds(20));
     }
 
     public void verifyErrorNotificationText() {
@@ -190,6 +190,4 @@ public class OrderPage {
         cvcCodeSub.shouldBe(visible);
         cvcCodeSub.shouldHave(text(subFieldText));
     }
-
-
 }

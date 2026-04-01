@@ -1,6 +1,10 @@
 package ru.netology.test;
 
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +14,16 @@ import ru.netology.page.OrderPage;
 public class CreditUITest {
 
     OrderPage page = new OrderPage();
+
+    @BeforeAll
+    public static void setupAll() {
+        SelenideLogger.addListener("allure", new AllureSelenide());
+    }
+
+    @AfterAll
+    public static void tearDownAll() {
+        SelenideLogger.removeListener("allure");
+    }
 
     @BeforeEach
     void setup() {
@@ -49,19 +63,15 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Non Existing Card")
     void shouldNotMakePaymentWithNonExistingCard() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("1234567890123456");
+                .generateCardWithNumber("1234567812345678");
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyErrorNotification();
         page.verifyErrorNotificationText();
     }
 
-    //НЕГАТИВНЫЕ КЕЙСЫ - ВАЛИДАЦИЯ
-    /*Валидация поля номер карты при ПОКУПКЕ В КРЕДИТ:
-    отправка формы с пустым значением поля
-    отправка формы с нулями
-    отправка формы с некорректным номером (меньше чем 16 цифр - 1 и 15)*/
-
+    /* НЕГАТИВНЫЕ КЕЙСЫ - ВАЛИДАЦИЯ
+    TC-30: Проверка валидации поля Номер карты при оплате тура в кредит - пустое поле */
     @Test
     @DisplayName("Should Not Make Payment With Empty Card Field")
     void shouldNotMakePaymentWithEmptyCardField() {
@@ -72,6 +82,7 @@ public class CreditUITest {
         page.verifyCardFieldNotification("Неверный формат");
     }
 
+    /* TC-31: Проверка валидации поля Номер карты при оплате тура в кредит - поле с нулями */
     @Test
     @DisplayName("Should Not Make Payment With Zero Card Field")
     void shouldNotMakePaymentWithZeroCardField() {
@@ -82,30 +93,30 @@ public class CreditUITest {
         page.verifyCardFieldNotification("Неверный формат");
     }
 
+    /* TC-32: Проверка валидации поля Номер карты при оплате тура в кредит - неверный формат (1 цифра) */
     @Test
     @DisplayName("Should Not Make Payment With One Digit In Card Field")
     void shouldNotMakePaymentWithOneDigitInCardField() {
+        String oneDigit = DataHelper.generateRandomOneDigit();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("2");
+                .generateCardWithNumber(oneDigit);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCardFieldNotification("Неверный формат");
     }
 
+    /* TC-33: Проверка валидации поля Номер карты при оплате тура в кредит - неверный формат (15 цифр) */
     @Test
     @DisplayName("Should Not Make Payment With Less Than 16 In Card Field")
     void shouldNotMakePaymentWithLessThan16InCardField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("123412341234123");
+                .generateCardWithNumber("444444444444444");
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCardFieldNotification("Неверный формат");
     }
 
-    /*Валидация поля месяц при ПОКУПКЕ В КРЕДИТ:
-    отправка формы с пустым значением поля
-    отправка формы с нулями
-    отправка формы с некорректными значениями - 1 (одно число), 13 (невадидный месяц)*/
+    /* TC-34: Проверка валидации поля Месяц при оплате тура в кредит - пустое поле */
     @Test
     @DisplayName("Should Not Make Payment With Empty Month Field")
     void shouldNotMakePaymentWithEmptyMonthField() {
@@ -116,6 +127,7 @@ public class CreditUITest {
         page.verifyMonthFieldNotification("Неверный формат");
     }
 
+    /* TC-35: Проверка валидации поля Месяц при оплате тура в кредит - поле с нулями */
     @Test
     @DisplayName("Should Not Make Payment With Zero Month Field")
     void shouldNotMakePaymentWithZeroMonthField() {
@@ -123,36 +135,34 @@ public class CreditUITest {
                 .generateCardWithMonth("00");
         page.payWithCredit();
         page.fillAndSend(cardInfo);
-        page.verifyErrorNotification();
-        page.verifyErrorNotificationText();
+        page.verifyMonthFieldNotification("Неверный формат");
     }
 
+    /* TC-36: Проверка валидации поля Месяц при оплате тура в кредит - одна цифра в поле */
     @Test
     @DisplayName("Should Not Make Payment With One Digit Month Field")
     void shouldNotMakePaymentWithOneDigitMonthField() {
+        String oneDigit = DataHelper.generateRandomOneDigit();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithMonth("1");
+                .generateCardWithMonth(oneDigit);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyMonthFieldNotification("Неверный формат");
     }
 
+    /* TC-37: Проверка валидации поля Месяц при оплате тура в кредит - несуществующий месяц */
     @Test
     @DisplayName("Should Not Make Payment With Invalid Month Field")
     void shouldNotMakePaymentWithInvalidMonthField() {
+        String invalidMonth = DataHelper.generateInvalidMonth();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithMonth("13");
+                .generateCardWithMonth(invalidMonth);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyMonthFieldNotification("Неверно указан срок действия карты");
     }
 
-    /*Валидация поля год при ПОКУПКЕ В КРЕДИТ:
-отправка формы с пустым значением поля
-отправка формы с нулями
-отправка формы с одним значением - 1
-отправка формы с невалидным годом (в прошлом) - 15
-отправка формы с невалидным годом (в будущем, более 10 лет) - 40*/
+    /* TC-38: Проверка валидации поля Год при оплате тура в кредит - пустое поле */
     @Test
     @DisplayName("Should Not Make Payment With Empty Year Field")
     void shouldNotMakePaymentWithEmptyYearField() {
@@ -163,6 +173,7 @@ public class CreditUITest {
         page.verifyYearFieldNotification("Неверный формат");
     }
 
+    /* TC-39: Проверка валидации поля Год при оплате тура в кредит - поле с нулями */
     @Test
     @DisplayName("Should Not Make Payment With Zero Year Field")
     void shouldNotMakePaymentWithZeroYearField() {
@@ -173,43 +184,43 @@ public class CreditUITest {
         page.verifyYearFieldNotification("Истёк срок действия карты");
     }
 
+    /* TC-40: Проверка валидации поля Год при оплате тура в кредит - одна цифра в поле */
     @Test
     @DisplayName("Should Not Make Payment With One Digit Year Field")
     void shouldNotMakePaymentWithOneDigitYearField() {
+        String oneDigit = DataHelper.generateRandomOneDigit();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithYear("1");
+                .generateCardWithYear(oneDigit);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyYearFieldNotification("Неверный формат");
     }
 
+    /* TC-41: Проверка валидации поля Год при оплате тура в кредит - год в прошлом */
     @Test
     @DisplayName("Should Not Make Payment With Past Year Field")
     void shouldNotMakePaymentWithPastYearField() {
+        String pastYear = DataHelper.generatePastYear();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithYear("15");
+                .generateCardWithYear(pastYear);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyYearFieldNotification("Истёк срок действия карты");
     }
 
+    /* TC-42: Проверка валидации поля Год при оплате тура в кредит - год в будущем */
     @Test
     @DisplayName("Should Not Make Payment With Invalid Future Year Field")
     void shouldNotMakePaymentWithInvalidFutureYearField() {
+        String futureYear = DataHelper.generateFutureYear();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithYear("40");
+                .generateCardWithYear(futureYear);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyYearFieldNotification("Неверно указан срок действия карты");
     }
 
-    /*Валидация поля владелец при ПОКУПКЕ В КРЕДИТ:
-        отправка с пустым полем владелец
-        имя владельца на кириллице
-        слишком короткое имя (1 символ)
-        слишком длинное имя (100 символов)
-        спецсимволы в поле
-        числа в поле*/
+    /* TC-43: Проверка валидации поля Владелец при оплате тура в кредит - пустое поле */
     @Test
     @DisplayName("Should Not Make Payment With Empty Owner Field")
     void shouldNotMakePaymentWithEmptyOwnerField() {
@@ -220,36 +231,43 @@ public class CreditUITest {
         page.verifyOwnerFieldNotification("Поле обязательно для заполнения");
     }
 
+    /* TC-44: Проверка валидации поля Владелец при оплате тура в кредит - кириллица */
     @Test
     @DisplayName("Should Not Make Payment With Owner Field In Cyrillic")
     void shouldNotMakePaymentWithOwnerFieldInCyrillic() {
+        String cyrillicName = DataHelper.generateRandomRuName();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("Иван Иванович Иванов");
+                .generateCardWithOwner(cyrillicName);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
+    /* TC-45: Проверка валидации поля Владелец при оплате тура в кредит - слишком короткое */
     @Test
     @DisplayName("Should Not Make Payment With Too Short Owner Field")
     void shouldNotMakePaymentWithTooShortOwnerField() {
+        String shortString = DataHelper.generateRandomLetter();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("S");
+                .generateCardWithOwner(shortString);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
+    /* TC-46: Проверка валидации поля Владелец при оплате тура в кредит - слишком длинное */
     @Test
     @DisplayName("Should Not Make Payment With Too Long Owner Field")
     void shouldNotMakePaymentWithTooLongOwnerField() {
+        String longString = DataHelper.generateRandomLongString();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("HgTfRjKlMpQsWnXyZaBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqR");
+                .generateCardWithOwner(longString);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
+    /* TC-47: Проверка валидации поля Владелец при оплате тура в кредит - спецсимволы */
     @Test
     @DisplayName("Should Not Make Payment With Symbols In Owner Field")
     void shouldNotMakePaymentWithSymbolsInOwnerField() {
@@ -260,6 +278,7 @@ public class CreditUITest {
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
+    /* TC-48: Проверка валидации поля Владелец при оплате тура в кредит - числа */
     @Test
     @DisplayName("Should Not Make Payment With Digits In Owner Field")
     void shouldNotMakePaymentWithDigitsInOwnerField() {
@@ -270,11 +289,7 @@ public class CreditUITest {
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
-    /*Валидация поля cvc при ПОКУПКЕ В КРЕДИТ:
-    отправка с пустым полем cvc
-    нули в поле
-    1 цифра в поле
-    2 цифры в поле*/
+    /* TC-49: Проверка валидации поля Cvc при оплате тура в кредит - пустое поле */
     @Test
     @DisplayName("Should Not Make Payment With Empty Cvc Field")
     void shouldNotMakePaymentWithEmptyCvcField() {
@@ -285,6 +300,7 @@ public class CreditUITest {
         page.verifyCvcFieldNotification("Неверный формат");
     }
 
+    /* TC-50: Проверка валидации поля Cvc при оплате тура в кредит - нули в поле */
     @Test
     @DisplayName("Should Not Make Payment With Zero Cvc Field")
     void shouldNotMakePaymentWithZeroCvcField() {
@@ -295,23 +311,28 @@ public class CreditUITest {
         page.verifyCvcFieldNotification("Неверный формат");
     }
 
+    /* TC-51: Проверка валидации поля Cvc при оплате тура в кредит - одна цифра в поле */
     @Test
     @DisplayName("Should Not Make Payment With One Digit Cvc Field")
     void shouldNotMakePaymentWithOneDigitCvcField() {
+        String oneDigit = DataHelper.generateRandomOneDigit();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithCVC("1");
+                .generateCardWithCVC(oneDigit);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCvcFieldNotification("Неверный формат");
     }
 
+    /* TC-52: Проверка валидации поля Cvc при оплате тура в кредит - две цифры в поле */
     @Test
     @DisplayName("Should Not Make Payment With Two Digits Cvc Field")
     void shouldNotMakePaymentWithTwoDigitsCvcField() {
+        String twoDigits = DataHelper.generateRandomTwoDigits();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithCVC("12");
+                .generateCardWithCVC(twoDigits);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCvcFieldNotification("Неверный формат");
     }
 }
+
