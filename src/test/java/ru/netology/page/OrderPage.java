@@ -1,4 +1,5 @@
 package ru.netology.page;
+
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.Keys;
@@ -109,22 +110,13 @@ public class OrderPage {
         creditHeading.shouldBe(visible);
     }
 
-    // Заполнение формы
-    public void fillCardData(String number, String month, String year,
-                             String owner, String cvc) {
-        cardNumber.setValue(number);
-        this.month.setValue(month);
-        this.year.setValue(year);
-        this.owner.setValue(owner);
-        cvcCode.setValue(cvc);
-    }
-
     public void fillCardData(DataHelper.CardInfo cardInfo) {
         cardNumber.setValue(cardInfo.getNumber());
         this.month.setValue(cardInfo.getMonth());
         this.year.setValue(cardInfo.getYear());
         this.owner.setValue(cardInfo.getOwner());
-        cvcCode.setValue(cardInfo.getCvc());}
+        cvcCode.setValue(cardInfo.getCvc());
+    }
 
     // Отправка формы
     public void continueClick() {
@@ -137,33 +129,34 @@ public class OrderPage {
         continueClick();
     }
 
-    // Нотификации
-    public void verifySuccessNotification() {
-        successNotification.shouldBe(visible, Duration.ofSeconds(15));
+    // Метод для ожидания БД - не сразу данные записываются
+    public void waitForDB() {
+        try {
+            Thread.sleep(15000);
+        } catch (InterruptedException e) {
+            e.getStackTrace();
+        }
     }
 
+    // Нотификации
     public void verifySuccessNotificationText() {
         successNotification
                 .$(".notification__title")
-                .shouldHave(Condition.exactText("Успешно"));
+                .shouldHave(Condition.exactText("Успешно"), Duration.ofSeconds(15));
 
         successNotification
                 .$(".notification__content")
-                .shouldHave(Condition.exactText("Операция одобрена Банком."));
-    }
-
-    public void verifyErrorNotification() {
-        errorNotification.shouldBe(visible, Duration.ofSeconds(20));
+                .shouldHave(Condition.exactText("Операция одобрена Банком."), Duration.ofSeconds(15));
     }
 
     public void verifyErrorNotificationText() {
         errorNotification
                 .$(".notification__title")
-                .shouldHave(Condition.exactText("Ошибка"));
+                .shouldHave(Condition.exactText("Ошибка"), Duration.ofSeconds(15));
 
         errorNotification
                 .$(".notification__content")
-                .shouldHave(Condition.exactText("Ошибка! Банк отказал в проведении операции."));
+                .shouldHave(Condition.exactText("Ошибка! Банк отказал в проведении операции."), Duration.ofSeconds(15));
     }
 
     public void verifyCardFieldNotification(String subFieldText) {

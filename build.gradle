@@ -18,13 +18,11 @@ compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
 allure {
-    // совместимая с jdk 11 версия allure
     version = "2.27.0"
 }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testImplementation 'io.rest-assured:rest-assured:5.3.0'
     testImplementation 'mysql:mysql-connector-java:8.0.22'
     testImplementation 'org.postgresql:postgresql:42.2.18'
     testImplementation 'com.github.javafaker:javafaker:1.0.2'
@@ -32,13 +30,12 @@ dependencies {
     testImplementation 'com.codeborne:selenide:6.19.1'
     testCompileOnly 'org.projectlombok:lombok:1.18.36'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
-    testImplementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'org.slf4j:slf4j-simple:2.0.3'
-    // библиотека allure-selenide для интеграции allure с селенидом
     testImplementation 'io.qameta.allure:allure-selenide:2.27.0'
 }
 
 test {
     useJUnitPlatform()
     systemProperty 'selenide.headless', System.getProperty('selenide.headless')
+    systemProperty 'db.url', System.getProperty('db.url', 'jdbc:mysql://localhost:3306/app')
 }

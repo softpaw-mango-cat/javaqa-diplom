@@ -3,17 +3,20 @@ package ru.netology.test;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.netology.data.DataHelper;
+import ru.netology.data.SQLHelper;
 import ru.netology.page.OrderPage;
 
 public class CreditUITest {
 
-    OrderPage page = new OrderPage();
+    private OrderPage page;
 
     @BeforeAll
     public static void setupAll() {
@@ -29,19 +32,65 @@ public class CreditUITest {
     void setup() {
         page = Selenide
                 .open("http://localhost:8080", OrderPage.class);
+        SQLHelper.cleanDB();
     }
 
     /* ПОЗИТИВНЫЕ КЕЙСЫ
     TC-02: Успешная оплата тура в кредит по одобренной карте
-    Шаги 1-3 */
+    Шаг 1- 3 */
     @Test
     @DisplayName("Should Make Payment With Approved Card")
     void shouldMakePaymentWithApprovedCard() {
         DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
-        page.verifySuccessNotification();
         page.verifySuccessNotificationText();
+    }
+
+    /* Шаг 4 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Status With Approved Card")
+    void shouldHaveCorrectStatusWithApprovedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var credit = SQLHelper.getLastCredit();
+        Assertions.assertEquals("APPROVED", credit.getStatus());
+    }
+
+    /* Шаг 5 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Id With Approved Card")
+    void shouldHaveCorrectIdWithApprovedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var order = SQLHelper.getLastOrder();
+        Assertions.assertAll(
+                () -> Assertions.assertNotNull(order.getCredit_id()),
+                () -> Assertions.assertNull(order.getPayment_id())
+        );
+    }
+
+    /* Шаг 6 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Credit Id With Approved Card")
+    void shouldHaveCorrectCreditIdWithApprovedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var credit = SQLHelper.getLastCredit();
+        var order = SQLHelper.getLastOrder();
+        Assertions.assertEquals(credit.getBank_id(), order.getCredit_id());
     }
 
     /* НЕГАТИВНЫЕ КЕЙСЫ
@@ -53,8 +102,53 @@ public class CreditUITest {
         DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
-        page.verifyErrorNotification();
         page.verifyErrorNotificationText();
+    }
+
+    /* Шаг 4 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Status With Declined Card")
+    void shouldHaveCorrectStatusWithDeclinedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var credit = SQLHelper.getLastCredit();
+        Assertions.assertEquals("DECLINED", credit.getStatus());
+    }
+
+    /* Шаг 5 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Id With Declined Card")
+    void shouldHaveCorrectIdWithDeclinedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var order = SQLHelper.getLastOrder();
+        Assertions.assertAll(
+                () -> Assertions.assertNotNull(order.getCredit_id()),
+                () -> Assertions.assertNull(order.getPayment_id())
+        );
+    }
+
+    /* Шаг 6 */
+    @Test
+    @SneakyThrows
+    @DisplayName("Should Have Correct Credit Id With Declined Card")
+    void shouldHaveCorrectCreditIdWithDeclinedCard() {
+        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var credit = SQLHelper.getLastCredit();
+        var order = SQLHelper.getLastOrder();
+        Assertions.assertEquals(credit.getBank_id(), order.getCredit_id());
     }
 
     /* TC-06: Отклонение оплаты тура в кредит по карте не входящей в набор валидных карт
@@ -62,12 +156,31 @@ public class CreditUITest {
     @Test
     @DisplayName("Should Not Make Payment With Non Existing Card")
     void shouldNotMakePaymentWithNonExistingCard() {
+        String randomNumber = DataHelper.generateRandomCardNumber();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("1234567812345678");
+                .generateCardWithNumber(randomNumber);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
-        page.verifyErrorNotification();
         page.verifyErrorNotificationText();
+    }
+
+    /* Шаг 4-5 */
+    @Test
+    @DisplayName("Should Not Save Credit And Order With Non Existing Card")
+    void shouldNotSaveCreditAndOrderWithNonExistingCard() {
+        String randomNumber = DataHelper.generateRandomCardNumber();
+        DataHelper.CardInfo cardInfo = DataHelper
+                .generateCardWithNumber(randomNumber);
+        page.payWithCredit();
+        page.fillAndSend(cardInfo);
+        page.waitForDB();
+
+        var credits = SQLHelper.getAllCredits();
+        var orders = SQLHelper.getAllOrders();
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(credits.isEmpty()),
+                () -> Assertions.assertTrue(orders.isEmpty())
+        );
     }
 
     /* НЕГАТИВНЫЕ КЕЙСЫ - ВАЛИДАЦИЯ
@@ -76,7 +189,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Empty Card Field")
     void shouldNotMakePaymentWithEmptyCardField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("");
+                .generateCardWithEmptyNumber();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCardFieldNotification("Неверный формат");
@@ -87,7 +200,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Zero Card Field")
     void shouldNotMakePaymentWithZeroCardField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("0000000000000000");
+                .generateCardWithZeroNumber();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCardFieldNotification("Неверный формат");
@@ -109,8 +222,9 @@ public class CreditUITest {
     @Test
     @DisplayName("Should Not Make Payment With Less Than 16 In Card Field")
     void shouldNotMakePaymentWithLessThan16InCardField() {
+        String cardNumber = DataHelper.generate15DigitCardNumber();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber("444444444444444");
+                .generateCardWithNumber(cardNumber);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCardFieldNotification("Неверный формат");
@@ -121,7 +235,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Empty Month Field")
     void shouldNotMakePaymentWithEmptyMonthField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithMonth("");
+                .generateCardWithEmptyMonth();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyMonthFieldNotification("Неверный формат");
@@ -132,7 +246,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Zero Month Field")
     void shouldNotMakePaymentWithZeroMonthField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithMonth("00");
+                .generateCardWithZeroMonth();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyMonthFieldNotification("Неверный формат");
@@ -167,7 +281,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Empty Year Field")
     void shouldNotMakePaymentWithEmptyYearField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithYear("");
+                .generateCardWithEmptyYear();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyYearFieldNotification("Неверный формат");
@@ -178,7 +292,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Zero Year Field")
     void shouldNotMakePaymentWithZeroYearField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithYear("00");
+                .generateCardWithZeroYear();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyYearFieldNotification("Истёк срок действия карты");
@@ -225,7 +339,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Empty Owner Field")
     void shouldNotMakePaymentWithEmptyOwnerField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("");
+                .generateCardWithEmptyOwner();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Поле обязательно для заполнения");
@@ -271,8 +385,9 @@ public class CreditUITest {
     @Test
     @DisplayName("Should Not Make Payment With Symbols In Owner Field")
     void shouldNotMakePaymentWithSymbolsInOwnerField() {
+        String symbols = DataHelper.generateRandomSymbols();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("!@#$%^&*()_+{}:<>?");
+                .generateCardWithOwner(symbols);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Неверный формат");
@@ -282,8 +397,9 @@ public class CreditUITest {
     @Test
     @DisplayName("Should Not Make Payment With Digits In Owner Field")
     void shouldNotMakePaymentWithDigitsInOwnerField() {
+        String digits = DataHelper.generateRandomDigits();
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithOwner("1234567890");
+                .generateCardWithOwner(digits);
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyOwnerFieldNotification("Неверный формат");
@@ -294,7 +410,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Empty Cvc Field")
     void shouldNotMakePaymentWithEmptyCvcField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithCVC("");
+                .generateCardWithEmptyCVC();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCvcFieldNotification("Неверный формат");
@@ -305,7 +421,7 @@ public class CreditUITest {
     @DisplayName("Should Not Make Payment With Zero Cvc Field")
     void shouldNotMakePaymentWithZeroCvcField() {
         DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithCVC("000");
+                .generateCardWithZeroCVC();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyCvcFieldNotification("Неверный формат");

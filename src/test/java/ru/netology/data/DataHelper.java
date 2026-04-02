@@ -69,6 +69,22 @@ public class DataHelper {
         return FAKER.numerify("###");
     }
 
+    public static String generateRandomCardNumber() {
+        return FAKER.numerify("################");
+    }
+
+    public static String generate15DigitCardNumber() {
+        return FAKER.numerify("###############");
+    }
+
+    public static String generateRandomSymbols() {
+        return FAKER.regexify("[!@#$%^&*()_+]{10}");
+    }
+
+    public static String generateRandomDigits() {
+        return FAKER.regexify("[0-9]{10}");
+    }
+
     public static String generateRandomOneDigit() {
         return FAKER.numerify("#");
     }
@@ -93,8 +109,28 @@ public class DataHelper {
                 generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
     }
 
+    public static CardInfo generateCardWithEmptyNumber() {
+        return new CardInfo("", generateCurrentMonth(),
+                generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
+    }
+
+    public static CardInfo generateCardWithZeroNumber() {
+        return new CardInfo("0000000000000000", generateCurrentMonth(),
+                generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
+    }
+
     public static CardInfo generateCardWithMonth(String month) {
         return new CardInfo(getValidApprovedCardNumber(), month,
+                generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
+    }
+
+    public static CardInfo generateCardWithEmptyMonth() {
+        return new CardInfo(getValidApprovedCardNumber(), "",
+                generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
+    }
+
+    public static CardInfo generateCardWithZeroMonth() {
+        return new CardInfo(getValidApprovedCardNumber(), "00",
                 generateCurrentYear(), generateRandomEngName(), generateRandomCVC());
     }
 
@@ -103,14 +139,39 @@ public class DataHelper {
                 year, generateRandomEngName(), generateRandomCVC());
     }
 
+    public static CardInfo generateCardWithEmptyYear() {
+        return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
+                "", generateRandomEngName(), generateRandomCVC());
+    }
+
+    public static CardInfo generateCardWithZeroYear() {
+        return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
+                "00", generateRandomEngName(), generateRandomCVC());
+    }
+
     public static CardInfo generateCardWithOwner(String owner) {
         return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
                 generateCurrentYear(), owner, generateRandomCVC());
     }
 
+    public static CardInfo generateCardWithEmptyOwner() {
+        return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
+                generateCurrentYear(), "", generateRandomCVC());
+    }
+
     public static CardInfo generateCardWithCVC(String cvc) {
         return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
                 generateCurrentYear(), generateRandomEngName(), cvc);
+    }
+
+    public static CardInfo generateCardWithEmptyCVC() {
+        return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
+                generateCurrentYear(), generateRandomEngName(), "");
+    }
+
+    public static CardInfo generateCardWithZeroCVC() {
+        return new CardInfo(getValidApprovedCardNumber(), generateCurrentMonth(),
+                generateCurrentYear(), generateRandomEngName(), "000");
     }
 
     @Value
