@@ -3,7 +3,6 @@ package ru.netology.test;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,8 +35,7 @@ public class CreditUITest {
     }
 
     /* ПОЗИТИВНЫЕ КЕЙСЫ
-    TC-02: Успешная оплата тура в кредит по одобренной карте
-    Шаг 1- 3 */
+    TC-02: Успешная оплата тура в кредит по одобренной карте */
     @Test
     @DisplayName("Should Make Payment With Approved Card")
     void shouldMakePaymentWithApprovedCard() {
@@ -45,57 +43,19 @@ public class CreditUITest {
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifySuccessNotificationText();
-    }
-
-    /* Шаг 4 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Status With Approved Card")
-    void shouldHaveCorrectStatusWithApprovedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
 
         var credit = SQLHelper.getLastCredit();
-        Assertions.assertEquals("APPROVED", credit.getStatus());
-    }
-
-    /* Шаг 5 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Id With Approved Card")
-    void shouldHaveCorrectIdWithApprovedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
-
         var order = SQLHelper.getLastOrder();
         Assertions.assertAll(
+                () -> Assertions.assertEquals("APPROVED", credit.getStatus()),
                 () -> Assertions.assertNotNull(order.getCredit_id()),
-                () -> Assertions.assertNull(order.getPayment_id())
+                () -> Assertions.assertNull(order.getPayment_id()),
+                () -> Assertions.assertEquals(credit.getBank_id(), order.getCredit_id())
         );
     }
 
-    /* Шаг 6 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Credit Id With Approved Card")
-    void shouldHaveCorrectCreditIdWithApprovedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidApprovedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
-
-        var credit = SQLHelper.getLastCredit();
-        var order = SQLHelper.getLastOrder();
-        Assertions.assertEquals(credit.getBank_id(), order.getCredit_id());
-    }
-
     /* НЕГАТИВНЫЕ КЕЙСЫ
-    TC-04: Отклонение оплаты тура в кредит по отклоненной карте
-    Шаги 1-3 */
+    TC-04: Отклонение оплаты тура в кредит по отклоненной карте */
     @Test
     @DisplayName("Should Not Make Payment With Declined Card")
     void shouldNotMakePaymentWithDeclinedCard() {
@@ -103,56 +63,18 @@ public class CreditUITest {
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyErrorNotificationText();
-    }
-
-    /* Шаг 4 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Status With Declined Card")
-    void shouldHaveCorrectStatusWithDeclinedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
 
         var credit = SQLHelper.getLastCredit();
-        Assertions.assertEquals("DECLINED", credit.getStatus());
-    }
-
-    /* Шаг 5 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Id With Declined Card")
-    void shouldHaveCorrectIdWithDeclinedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
-
         var order = SQLHelper.getLastOrder();
         Assertions.assertAll(
+                () -> Assertions.assertEquals("DECLINED", credit.getStatus()),
                 () -> Assertions.assertNotNull(order.getCredit_id()),
-                () -> Assertions.assertNull(order.getPayment_id())
+                () -> Assertions.assertNull(order.getPayment_id()),
+                () -> Assertions.assertEquals(credit.getBank_id(), order.getCredit_id())
         );
     }
 
-    /* Шаг 6 */
-    @Test
-    @SneakyThrows
-    @DisplayName("Should Have Correct Credit Id With Declined Card")
-    void shouldHaveCorrectCreditIdWithDeclinedCard() {
-        DataHelper.CardInfo cardInfo = DataHelper.generateValidDeclinedCard();
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
-
-        var credit = SQLHelper.getLastCredit();
-        var order = SQLHelper.getLastOrder();
-        Assertions.assertEquals(credit.getBank_id(), order.getCredit_id());
-    }
-
-    /* TC-06: Отклонение оплаты тура в кредит по карте не входящей в набор валидных карт
-    Шаги 1-3 */
+    /* TC-06: Отклонение оплаты тура в кредит по карте не входящей в набор валидных карт */
     @Test
     @DisplayName("Should Not Make Payment With Non Existing Card")
     void shouldNotMakePaymentWithNonExistingCard() {
@@ -162,18 +84,6 @@ public class CreditUITest {
         page.payWithCredit();
         page.fillAndSend(cardInfo);
         page.verifyErrorNotificationText();
-    }
-
-    /* Шаг 4-5 */
-    @Test
-    @DisplayName("Should Not Save Credit And Order With Non Existing Card")
-    void shouldNotSaveCreditAndOrderWithNonExistingCard() {
-        String randomNumber = DataHelper.generateRandomCardNumber();
-        DataHelper.CardInfo cardInfo = DataHelper
-                .generateCardWithNumber(randomNumber);
-        page.payWithCredit();
-        page.fillAndSend(cardInfo);
-        page.waitForDB();
 
         var credits = SQLHelper.getAllCredits();
         var orders = SQLHelper.getAllOrders();

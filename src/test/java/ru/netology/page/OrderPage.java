@@ -129,15 +129,6 @@ public class OrderPage {
         continueClick();
     }
 
-    // Метод для ожидания БД - не сразу данные записываются
-    public void waitForDB() {
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.getStackTrace();
-        }
-    }
-
     // Нотификации
     public void verifySuccessNotificationText() {
         successNotification
