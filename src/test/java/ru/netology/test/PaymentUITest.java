@@ -160,7 +160,7 @@ public class PaymentUITest {
                 .generateCardWithZeroMonth();
         page.payWithCard();
         page.fillAndSend(cardInfo);
-        page.verifyMonthFieldNotification("Неверный формат");
+        page.verifyMonthFieldNotification("Неверно указан срок действия карты");
     }
 
     /* TC-13: Проверка валидации поля Месяц при обычной оплате тура - одна цифра в поле */
@@ -304,7 +304,7 @@ public class PaymentUITest {
         page.verifyOwnerFieldNotification("Неверный формат");
     }
 
-    /* TC-25: Проверка валидации поля Владелец при обычной оплате тура - числа */
+    /* TC-25: Проверка валидации поля Владелец при обычной оплате тура - цифры */
     @Test
     @DisplayName("Should Not Make Payment With Digits In Owner Field")
     void shouldNotMakePaymentWithDigitsInOwnerField() {

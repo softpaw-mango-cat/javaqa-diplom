@@ -159,7 +159,7 @@ public class CreditUITest {
                 .generateCardWithZeroMonth();
         page.payWithCredit();
         page.fillAndSend(cardInfo);
-        page.verifyMonthFieldNotification("Неверный формат");
+        page.verifyMonthFieldNotification("Неверно указан срок действия карты");
     }
 
     /* TC-36: Проверка валидации поля Месяц при оплате тура в кредит - одна цифра в поле */
